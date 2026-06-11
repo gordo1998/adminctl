@@ -1,11 +1,11 @@
 #!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../options/user/create.sh"
+source "$SCRIPT_DIR/../options/user/delete.sh"
+source "$SCRIPT_DIR/../options/user/import.sh"
+source "$SCRIPT_DIR/../options/user/dimport.sh"
 
-source "../options/user/create.sh"
-source "../options/user/delete.sh"
-source "../options/user/import.sh"
-source "../options/user/dimport.sh"
-
-COMMAND="$1"
+USERCTL_COMMAND="$1"
 
 usage(){
 cat << EOF
@@ -27,8 +27,9 @@ EOF
 
 VERSION=$(cat "../version/version")
 
-case "$COMMAND" in
+case "$USERCTL_COMMAND" in
 	create)
+		shift
 		uc_create_user "$@"
 		;;
 	delete)
