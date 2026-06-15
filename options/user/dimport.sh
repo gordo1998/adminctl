@@ -1,19 +1,27 @@
 #!/bin/bash
 
-
-
 UDI_DIR_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-UDI_LIB_PAR_EXT="$(cd "$UDI_DIR_SOURCE/../../lib/parser" && pwd)"
-source "$UDI_LIB_PAR_EXT/detect_extensions/detect_extensions.sh"
+LIB_DIR="$(cd "$UDI_DIR_SOURCE/../../lib" && pwd)"
 
-UDI_PARSED=$(lpd_det_ext "$@")
+source "$LIB_DIR/parser/detect_extensions/detect_extensions.sh"
+source "$LIB_DIR/user/delete.sh"
+source "$LIB_DIR/user/validation.sh"
+
 
 udi_delete_users(){
+	local parsed=$(lpd_det_ext "$@")
+	local statement=0
 	while read -r user;do
-		echo "Eliminando usuario $user..."
-		sudo userdel -r "$user" &>/dev/null
-		([[ $? == 0 || $? == 12 ]] && echo "Usuario $user eliminado correctamente") || (echo "El usuario $user no se ha podidio eliminar" && exit 1)
-	done <<<"$UDI_PARSED"
+		validate_param "$user"
+		statement=$?
+		if [[ $statement -eq 0 ]];then
+			echo "Eliminando usuario $user..."
+			delete_user "$user"
+		else
+			return 1
+		fi
+		
+	done <<<"$parsed"
 }
 
 
