@@ -1,38 +1,28 @@
 #!/bin/bash
 
 SCRIPT_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_MOD_SOURCE="$(cd "$SCRIPT_SOURCE/../../lib/mode" && pwd)"
-source "$LIB_MOD_SOURCE/lib_mode_det_mode.sh"
+LIB_DIR="$(cd "$SCRIPT_SOURCE/../../lib" && pwd)"
 
-UD_USER=""
+source "$LIB_DIR/mode/lib_mode_det_mode.sh"
+source "$LIB_DIR/user/validation.sh"
+source "$LIB_DIR/user/delete.sh"
 
-ud_det_user(){
-	while [[ $# -gt 0 ]];do
-		case "$1" in
-			delete)
-				shift
-				;;
-			*)
-				if [[ -z "$UD_USER" ]];then
-					UD_USER="$1"
-				else
-					echo "Opcion no valida"
-				fi
-				shift
-		esac
-	done
-}
+
 
 ud_dmake_user(){
-	echo "Eliminando usuario $UD_USER"
-	sudo userdel -r "$UD_USER" &> /dev/null
+	
+	local ud_user="$1"
+	validate_user "$ud_user"
+	local statement=$?
 
-	([[ $? == 0 || $? == 12 ]] && echo "usuaro $UD_USER eliminado correctamente") || echo "El usuario $UD_USER no existe o no se ha podido eliminar correctamente" && exit 1
+	if [[ $statement -eq 0 ]];then
+		delete_user "$ud_user"
+	else
+		return 1
+	fi
+
 }
 
-ud_delete_user(){
-	ud_det_user "$@"
-	ud_dmake_user
-}
+
 
 
