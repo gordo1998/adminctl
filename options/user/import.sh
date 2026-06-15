@@ -16,8 +16,17 @@ ui_import_users(){
 	local ui_dir=$(lm_det_mode "$@")
 
 	while IFS="|" read -r user path_user;do
-		local dir_complete="$ui_dir/$path_user"
-		echo "Creando usuario $user..."
-		exec_comm "$user" "$dir_complete"
+		local complete_dir="$ui_dir/$path_user"
+		validate_param "$user"
+		local statement=$?
+
+		if [[ $statement -eq 0 ]];then
+			echo "El usuario es: $user"
+			echo "El directorio personal es: $dir_root"
+			#Llamamos a la funcion de ejecucion  que se encuentra en la libreria
+			exec_comm "$user" "$complete_dir"
+		else
+			return 1
+		fi
 	done <<< "$UI_PARSED"
 }
