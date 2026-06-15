@@ -2,31 +2,13 @@
 
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="$(cd "$SCRIPT_DIR/../../lib/mode"  && pwd)"
+LIB_DIR="$(cd "$SCRIPT_DIR/../../lib"  && pwd)"
 
 
+source "$LIB_DIR/mode/lib_mode_det_mode.sh"
+source "$LIB_DIR/user/validation.sh"
+source "$LIB_DIR/user/execution.sh"
 
-source "$LIB_DIR/lib_mode_det_mode.sh"
-
-
-#DEBERIAMOS GUARDAR UNA VARIABLE DONDE ALMACENE EL DIR RAIZ, INDEPENDIENTEMENTE DE SI ES LAB O NORMAL. ESO LO HARA OTRA FUNCION DE LA LIB MODE.
-
-
-
-
-uc_validate_param(){
-	local user="$1"
-	#USUARIO NO PUEDE ESTAR VACÍO
-	[[ -z "$user" ]] && echo "Error: debes especificar un usuario" >&2 && return 1
-
-	#USUARIO NO DEBE EMPEZAR POR GUIÓN PARA NO CONFUNDIR CON PARÁMETROS
-	[[ "$user" == -*  ]] && echo "Error: El usuario no debe empezar por guiones" >&2  && return 1
-
-	#USUARIO NO DBE CONTENER CARÁCTERES INVÁLIDOS
-	[[ ! "$user" =~ ^[a-z0-9_]+$ ]] && echo "Error: el usuario $user contiene carácteres inválidos" >&2 && return 1
-
-	return 0
-}
 
 #ESTA FUNCIÓN VALIDARÁ EL PARÁMETRO
 uc_det_param(){
@@ -51,35 +33,25 @@ uc_det_param(){
 		esac
 	done
 
-	uc_validate_param "$user"
+	validation_param "$user"
 	statement=$?
 	echo "$user|$dir_par|$statement"
-}
-
-uc_exec_comm(){
-	local user="$1"
-	local dir_complete="$2"
-	
-	echo "Creando usuario $user..."
-	sudo useradd -m -d "$dir_complete" "$user"
-	([[ $? -eq 0 ]] && echo "usuario $user creado correctamente.") || (echo "El usuario $user no se ha podido crear" && exit 1)
 }
 
 uc_create_user(){
 	local dir_root=$(lm_det_mode)
 	local complete_dir=""
-	#A ver necesito completar aquí la ruta correcta. Y además, necesito crear otro puto array para pasarlo
-	#a la funcion de ejecucion. Necesito las siguientes variables.
-	# usuario, dircompleto	
+	
 	IFS='|' read -r user dir_par statement <<< "$(uc_det_param "$@")"
 	complete_dir="$dir_root/$dir_par"
 	
 	if [[ $statement -eq 0 ]];then
-		echo "El usuairo es: $user"
+		echo "El usuario es: $user"
 		echo "El directorio personal es: $dir_root"
-		uc_exec_comm "$user" "$complete_dir"
+		#Llamamos a la funcion de ejecucion  que se encuentra en la libreria
+		exec_comm "$user" "$complete_dir"
 	else
-		echo "Error en el parámetro"
+		return 1
 	fi
 	
 }
