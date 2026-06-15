@@ -22,11 +22,11 @@ ui_import_users(){
 
 		if [[ $statement -eq 0 ]];then
 			echo "El usuario es: $user"
-			echo "El directorio personal es: $dir_root"
+			echo "El directorio personal es: $complete_dir"
 			#Llamamos a la funcion de ejecucion  que se encuentra en la libreria
 			exec_comm "$user" "$complete_dir"
 		else
 			return 1
 		fi
-	done <<< "$UI_PARSED"
+	done <<< "$ui_parsed"
 }
