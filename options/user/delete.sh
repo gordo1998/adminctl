@@ -12,7 +12,7 @@ source "$LIB_DIR/user/delete.sh"
 ud_dmake_user(){
 	
 	local ud_user="$1"
-	validate_user "$ud_user"
+	validate_param "$ud_user"
 	local statement=$?
 
 	if [[ $statement -eq 0 ]];then
